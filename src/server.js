@@ -30,7 +30,7 @@ mongoose.connect(mongoUri, {
 .catch((err) => console.error("MongoDB Connection Error:", err));
 
 app.get("/", (req, res) => {
-  res.send("Server çalışıyor!");
+  res.send("Server running!");
 });
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

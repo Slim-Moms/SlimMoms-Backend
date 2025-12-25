@@ -11,16 +11,16 @@ router.post("/register", async (req, res) => {
 
     const exists = await User.findOne({ email });
     if (exists) {
-      return res.status(409).json({ message: "Bu email zaten kayıtlı" });
+      return res.status(409).json({ message: "This email is already registered." });
     }
 
     const user = new User({ name, email, password });
     await user.save();
 
-    res.status(201).json({ message: "Kayıt başarılı", userId: user._id });
+    res.status(201).json({ message: "Registration successful!", userId: user._id });
   } catch (err) {
     console.error("Register Error:", err);
-    res.status(500).json({ message: "Sunucu hatası (register)" });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -31,12 +31,12 @@ router.post("/login", async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: "Kullanıcı bulunamadı" });
+      return res.status(401).json({ message: "User not found!" });
     }
 
     const ok = await user.comparePassword(password);
     if (!ok) {
-      return res.status(401).json({ message: "Şifre yanlış" });
+      return res.status(401).json({ message: "Password is wrong!" });
     }
 
     const token = jwt.sign(
@@ -45,16 +45,16 @@ router.post("/login", async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || "24h" }
     );
 
-    res.json({ message: "Giriş başarılı", token });
+    res.json({ message: "Login successful!", token });
   } catch (err) {
     console.error("Login Error:", err);
-    res.status(500).json({ message: "Sunucu hatası (login)" });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
 // Logout bölümü kontrol amaçlı
 router.post("/logout", (req, res) => {
-  res.json({ message: "Çıkış başarılı" });
+  res.json({ message: "Logout successful!" });
 });
 
 export default router;
