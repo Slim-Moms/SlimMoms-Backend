@@ -14,11 +14,25 @@ import { addMyProductsSchema } from '../validation/usersValidation.js';
 
 const router = Router();
 
-router.get('/products', ctrlWrapper(getMyProducts));
+router.post('/daily-calory-needs', ctrlWrapper(getDailyRateController));
+
+router.post(
+  '/my-daily-calories',
+  authenticate,
+  ctrlWrapper(getUserDailyRateController),
+);
+
+router.get(
+  '/my-daily-calories-needs',
+  authenticate,
+  ctrlWrapper(getUserDailyRateController),
+);
+
+router.get('/products', authenticate, ctrlWrapper(getMyProducts));
 
 router.post(
   '/products',
-
+  authenticate,
   validateBody(addMyProductsSchema),
   ctrlWrapper(addMyProductsController),
 );
@@ -29,18 +43,10 @@ router.delete(
   ctrlWrapper(deleteMyProductController),
 );
 
-router.post(
-  '/my-daily-calories',
+router.get(
+  '/calories-today',
   authenticate,
   ctrlWrapper(countMyCaloriesController),
 );
-
-router.get(
-  '/my-daily-calories-needs',
-  authenticate,
-  ctrlWrapper(getUserDailyRateController),
-);
-
-router.post('/daily-calory-needs', ctrlWrapper(getDailyRateController));
 
 export default router;
