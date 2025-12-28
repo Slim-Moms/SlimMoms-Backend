@@ -15,10 +15,12 @@ export const deleteMyProductController = async (request, response, next) => {
     return next(createHttpError(400, 'Invalid product id'));
   }
 
+  const searchDate = new Date(date);
+
   const deleteProduct = await myProductsModel.findOneAndDelete({
-    productId: productId,
+    _id: productId,
     userId: user,
-    date: date,
+    date: searchDate,
   });
 
   if (!deleteProduct) {
