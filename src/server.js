@@ -1,30 +1,44 @@
-import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import authRouter from './routers/auth.js';
-import dietRouter from './routers/diet.js';
-import initMongoDB from './db/initMongoDB.js';
+import express from 'express';
+import cookieParser from 'cookie-parser';
+import { pinoHttp } from 'pino-http';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFoundHandler } from './middlewares/notFoundHandler.js';
+import router from './routers/indexRouter.js';
 
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT;
 
-initMongoDB();
+export const createServer = () => {
+  const app = express();
 
-app.use(cors());
-app.use(express.json());
+  app.use(cors());
+  app.use(express.json());
+  app.use(cookieParser());
 
-app.use('/api/auth', authRouter);
-app.use('/api/diet', dietRouter);
+  app.use(
+    pinoHttp({
+      transport: {
+        target: 'pino-pretty',
+      },
+    }),
+  );
 
-app.get('/', (req, res) => {
-  res.send('Server running!');
-});
+  //! To check the server is running or not
+  app.get('/', (request, response) => {
+    response.send('Server running successfully');
+  });
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 
-app.use(notFoundHandler);
-app.use(errorHandler);
+  app.use(router);
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+  //! 404 Handling
+  app.use(notFoundHandler);
+
+  //! Error Handling
+  app.use(errorHandler);
+};
