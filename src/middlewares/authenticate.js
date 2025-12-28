@@ -1,50 +1,44 @@
-import jwt from 'jsonwebtoken';
-import { Session } from '../db/models/Session.js';
-import User from '../db/models/User.js';
-import createError from 'http-errors';
+import createHttpError from 'http-errors';
+import { SessionModel } from '../db/models/sessionModel.js';
+import { userModel } from '../db/models/userModel.js';
 
-const authenticate = async (req, res, next) => {
-  try {
-    const { authorization = '' } = req.headers;
-    const [bearer, token] = authorization.split(' ');
+export const authenticate = async (request, response, next) => {
+  const authorization = request.get('authorization');
 
-    if (bearer !== 'Bearer' || !token) {
-      throw createError(401, 'Not authorized');
-    }
-
-    // Token'ı verify et
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
-
-    // Session'ı kontrol et
-    const session = await Session.findOne({
-      userId: decoded.userId,
-      accessToken: token,
-      accessTokenValidUntil: { $gt: new Date() },
-    });
-
-    if (!session) {
-      throw createError(401, 'Not authorized');
-    }
-
-    // Kullanıcıyı bul
-    const user = await User.findById(decoded.userId);
-    if (!user) {
-      throw createError(401, 'Not authorized');
-    }
-
-    // Kullanıcıyı request objesine ekle
-    req.user = user;
-    next();
-  } catch (error) {
-    if (
-      error.name === 'JsonWebTokenError' ||
-      error.name === 'TokenExpiredError'
-    ) {
-      next(createError(401, 'Not authorized'));
-    } else {
-      next(error);
-    }
+  if (!authorization) {
+    next(createHttpError(401, 'Authorization header is missing'));
+    return;
   }
+
+  const [bearer, token] = authorization.split(' ');
+
+  if (bearer !== 'Bearer' || !token) {
+    next(createHttpError(401, 'Invalid token format'));
+    return;
+  }
+
+  const session = await SessionModel.findOne({ accessToken: token });
+
+  if (!session) {
+    next(createHttpError(401, 'Invalid token'));
+    return;
+  }
+
+  if (session.accessTokenValidUntil < new Date()) {
+    next(createHttpError(401, 'Token expired'));
+    return;
+  }
+
+  const user = await userModel.findById(session.userId);
+
+  if (!user) {
+    next(createHttpError(401, 'User not found'));
+    return;
+  }
+
+  request.user = user;
+
+  next();
 };
 
 export default authenticate;
