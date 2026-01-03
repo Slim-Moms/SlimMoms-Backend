@@ -42,3 +42,5 @@ export const createServer = () => {
   //! Error Handling
   app.use(errorHandler);
 };
+
+createServer();
