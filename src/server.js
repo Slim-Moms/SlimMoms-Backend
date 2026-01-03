@@ -9,7 +9,7 @@ import router from './routers/indexRouter.js';
 
 dotenv.config();
 
-const PORT = process.env.PORT || 2525;
+const PORT = process.env.PORT || 3000;
 
 export const createServer = () => {
   const app = express();
