@@ -2,18 +2,24 @@ import mongoose from 'mongoose';
 
 const initMongoDB = async () => {
   try {
-    const { MONGODB_URL } = process.env;
+    const url = process.env.MONGODB_URL;
 
-    if (!MONGODB_URL) {
-      throw new Error('MONGODB_URL environment variable is not defined');
+    console.log('Bağlantı denemesi yapılıyor...');
+
+    if (!url) {
+      console.error(
+        "KRİTİK HATA: MONGODB_URL tanımlı değil! Render Dashboard'u kontrol et.",
+      );
+      return;
     }
 
-    await mongoose.connect(MONGODB_URL);
+    await mongoose.connect(url, {
+      serverSelectionTimeoutMS: 5000,
+    });
 
     console.log('MongoDB connected successfully');
   } catch (error) {
-    console.log('Error connecting to MongoDB:', error);
-    process.exit(1);
+    console.error('MongoDB Bağlantı Hatası Detayı:', error.message);
   }
 };
 
