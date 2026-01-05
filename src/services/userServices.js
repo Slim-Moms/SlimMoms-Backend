@@ -3,16 +3,12 @@ import ProductsModel from '../db/models/productsModel.js';
 import { userModel } from '../db/models/userModel.js';
 
 export const getUserById = async (userId) => {
-  console.log('userId inside service:', userId);
   return await userModel.findOne({ _id: userId });
 };
 
 export const getNotAllowedProducts = async (bloodType) => {
   return await ProductsModel.distinct('categories', {
-    [`groupBloodNotAllowed.${bloodType}`]: {
-      $exists: true,
-      $ne: null,
-    },
+    [`groupBloodNotAllowed.${bloodType}`]: true,
   });
 };
 
